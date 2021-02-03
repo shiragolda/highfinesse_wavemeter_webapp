@@ -9,7 +9,7 @@ if __name__=='__main__':
     os.chdir("/home/labuser/Insync/electric.atoms@gmail.com/Google Drive/code/highfinesse_wavemeter")
 
 # wlmData.dll related imports
-import wlmData_client 
+import wlmData
 import wlmConst
 
 
@@ -18,21 +18,32 @@ class wmHandler:
     def __init__(self,port=9000):
         zmq_context = zmq.Context()
         self.port = port
-        self.socket = zmq_context.socket(zmq.REP)
-        self.socket.bind("tcp://*:%s"%self.port)
-        print("Handling requests on port %s"%(self.port))
         
         
         try:
-           print('loading')
-           self.dll = wlmData_client.LoadDLL()
-           time.sleep(1)
+            
+            self.socket = zmq_context.socket(zmq.REP)
+            self.socket.bind("tcp://192.168.0.110:%s"%self.port)
+            print("Handling requests on port %s"%(self.port))
+            
+            
+            try:
+                self.dll = wlmData.LoadDLL()
+                time.sleep(1)
+            except Exception as e:
+                print("Error loading wlmData library")
+                print(e)
+            
+            
+            while(True):
+                self.handle()
+        
+        
         except Exception as e:
-           print(e)
-        
-        
-        while(True):
-            self.handle()
+            if zmq.zmq_errno()==100:
+                print("Handler already started")
+            else:
+                print(e)
         
     def handle(self):
         message = self.receive()

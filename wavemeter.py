@@ -2,13 +2,15 @@
 import os
 #os.chdir("C:\\Users\\labuser\\gdrive\\code\\highfinesse_wavemeter")
 
+
 if __name__=='__main__':
     os.chdir("/home/labuser/Insync/electric.atoms@gmail.com/Google Drive/code/highfinesse_wavemeter")
 
 import zmq
 import time
 from zmq_publisher import zmqPublisher
-
+from wavemeter_handler import wmHandler
+import threading
 
 """
 
@@ -55,15 +57,30 @@ ResERR_TriggerWaiting = -19
 ResERR_NoLegitimation = -20
 
 """
+
+def start_handler():
+    handler = wmHandler()
+
 class WM:
     
     
-    def __init__(self,control_port=9000,publish=False,stream_port=5563,auto_adjust_on_startup=True):
+    def __init__(self,control_port=9000,publish=False,stream_port=5563,auto_adjust_on_startup=False):
 
 
         self.port = control_port #zmq port for handling wavemeter requests
         self.publish = publish
         self.auto_adjust_on_startup=auto_adjust_on_startup
+
+
+        try:
+            handler = threading.Thread(target=start_handler)
+            handler.start()
+        
+            #print("Starting handler")
+        except Exception as e:
+            print("Unknown error starting handler")
+            print(e)
+            
 
         zmq_context = zmq.Context()
         self.socket = zmq_context.socket(zmq.REQ)

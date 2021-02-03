@@ -20,22 +20,30 @@
 # v0.2 - Constant values added
 # 2018.09.15
 # v0.3 - Constant values separated to wlmConst.py, LoadDLL() added
+
+
+# Updated for linux support Jan 2021 by Shira Jackson
 #/
 
-
-
 import ctypes
-from _ctypes import dlclose
-import time
+import sys
 
-dll = None
 
 def LoadDLL():
-    global dll
-    #dll = ctypes.WinDLL(DLL_Path)
-    dll = ctypes.cdll.LoadLibrary("libwlmData.so")
-    handle = dll._handle
-    #time.sleep(3)
+    
+    # windows server:
+    if sys.platform=='windows':
+        dll = ctypes.WinDLL("wlmData.dll")
+        print("Loaded windows server library")
+    
+    # linux clients:
+    elif sys.platform=='linux':
+        dll = ctypes.cdll.LoadLibrary("libwlmData.so")
+        print("Loaded linux client library")
+    
+    else:
+        print("Unknown OS")
+        return None
 
 
     # LONG_PTR Instantiate(long RFC, long Mode, LONG_PTR P1, long P2)
@@ -667,7 +675,3 @@ def LoadDLL():
     dll.SetScale.restype = ctypes.c_long
 
     return dll
-
-
-if __name__ == "__main__":
-    test = LoadDLL()

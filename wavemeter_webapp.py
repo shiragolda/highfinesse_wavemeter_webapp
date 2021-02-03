@@ -137,27 +137,26 @@ def get_config():
 
     return config
 
-if __name__ == "__main__":
 
-    config = get_config()
+config = get_config()
 
-    #wlmeter = WavelengthMeter(debug=config["debug"])
-    wlmeter = WM()
+#wlmeter = WavelengthMeter(debug=config["debug"])
+wlmeter = WM()
 
-    app = make_app(config)
+app = make_app(config)
 
-    if "ssl" in config:
-        # https and wss server
-        server = tornado.httpserver.HTTPServer(app, xheaders=True, ssl_options=config["ssl"])
-    else:
-        # http and ws server
-        server = tornado.httpserver.HTTPServer(app)
+if "ssl" in config:
+    # https and wss server
+    server = tornado.httpserver.HTTPServer(app, xheaders=True, ssl_options=config["ssl"])
+else:
+    # http and ws server
+    server = tornado.httpserver.HTTPServer(app)
 
-    server.listen(config["port"])
-    print("Server started at http://localhost:%d%s/" % (config["port"], config["root"]))
+server.listen(config["port"])
+print("Server started at http://localhost:%d%s/" % (config["port"], config["root"]))
 
-    # periodic callback takes update rate in ms
-    PeriodicCallback(send_data, config["update_rate"]*1000).start()
+# periodic callback takes update rate in ms
+PeriodicCallback(send_data, config["update_rate"]*1000).start()
 
-    tornado.ioloop.IOLoop.instance().start()
+tornado.ioloop.IOLoop.instance().start()
 
