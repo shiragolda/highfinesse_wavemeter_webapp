@@ -2,13 +2,14 @@ function Wavemeter(options){
     var _wlm = {};
     _wlm.options = options;
     _wlm.wavelengths = [0,0,0,0,0,0,0,0];
+    _wlm.frequencies = [0,0,0,0,0,0,0,0];
     _wlm.updateCallback = null;
     _wlm.closeCallback = null;
     _wlm.parseData = function(d){
-        _wlm.wavelengths = d;
+        _wlm.frequencies = d;
         for (var i = 0; i < options.channels.length; i++) {
             var channel = options.channels[i];
-            document.getElementById(channel.element).innerHTML = _wlm.wavelengths[channel.channel].toFixed(_wlm.options.precision);
+            document.getElementById(channel.element).innerHTML = _wlm.frequencies[channel.channel].toFixed(_wlm.options.precision);
         }
     };
 

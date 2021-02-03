@@ -1,7 +1,8 @@
 // function to calculate background gradient from the wavelength value
-function nmToRGB(wavelength){
+function nmToRGB(frequency){
     var Gamma = 0.80,
     IntensityMax = 255,
+    wavelength = 300000000/frequency,
     factor, red, green, blue;
     if((wavelength >= 380) && (wavelength<440)){
         red = -(wavelength - 440) / (440 - 380);
@@ -23,12 +24,8 @@ function nmToRGB(wavelength){
         red = 1.0;
         green = -(wavelength - 645) / (645 - 580);
         blue = 0.0;
-    }else if((wavelength >= 645) && (wavelength<781)){
-        red = 1.0;
-        green = 0.0;
-        blue = 0.0;
     }else{
-        red = 0.0;
+        red = 1.0;
         green = 0.0;
         blue = 0.0;
     };
@@ -40,7 +37,7 @@ function nmToRGB(wavelength){
     }else if((wavelength >= 701) && (wavelength<781)){
         factor = 0.3 + 0.7*(780 - wavelength) / (780 - 700);
     }else{
-        factor = 0.0;
+        factor = 0.5;
     };
     if (red !== 0){
         red = Math.round(IntensityMax * Math.pow(red * factor, Gamma));
@@ -55,8 +52,8 @@ function nmToRGB(wavelength){
 }
 
 // applying background gradient
-function makebg(element, wavelength){
-    var v = nmToRGB(wavelength);
+function makebg(element, frequency){
+    var v = nmToRGB(frequency);
     var color = d3.rgb(v[0], v[1], v[2]);
     var c1 = color;
     var c2 = color.darker(2);
@@ -86,10 +83,10 @@ var oldData = [0,0,0,0,0,0,0,0];
 
 function parseData(d){
     for (var ch = 0; ch < d.length; ch++) {
-        var element = $('#wl'+ch).parent();
+        var element = $('#wl'+ch).parent(); // element is the parent element of div with id wli - the thing with the colourful background
         if(d[ch]>100){
             var wl = d[ch].toFixed(precision);
-            $('#wl'+ch).html(wl);
+            $('#wl'+ch).html(wl); //puts wl into the div with id wl1, wl2, etc. wl is the ith element of d (the data)
             // recalc background only if wavelength changed by 1nm or more
             if(Math.abs(d[ch]-oldData[ch])>1){
                 oldData[ch] = d[ch];
@@ -103,7 +100,17 @@ function parseData(d){
                     makebg(element, d[ch]);
                 }
             }
-        }else{
+        }else if(d[ch]==-3000){
+            $('#wl'+ch).html("Underexposed");
+            oldData[ch] = d[ch];
+            resetbg(element);
+        
+	}else if(d[ch]==-4000){
+            $('#wl'+ch).html("Overexposed");
+            oldData[ch] = d[ch];
+            resetbg(element);
+
+	}else{
             $('#wl'+ch).html("No data");
             oldData[ch] = d[ch];
             resetbg(element);
@@ -116,12 +123,12 @@ var ws;
 function connect(){
     ws = new WebSocket(location.protocol.replace("http","ws")+"//"+location.host+location.pathname+"ws/");
     var connected = false;
-    ws.onmessage = function(e) {
+    ws.onmessage = function(e) { //called when message is received from the server, 'e' is the message
         if(!connected){
             $("#modal").fadeOut(200);
             connected = true;
         }
-        parseData(JSON.parse(e.data));
+        parseData(JSON.parse(e.data)); // JSON.prase makes e.data becomes a javascript object
     };
     ws.onclose = function(e){
         connected = false;
