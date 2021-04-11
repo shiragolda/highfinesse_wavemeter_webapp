@@ -27,20 +27,24 @@
 
 import ctypes
 import sys
-
+import time
 
 def LoadDLL():
     
     # windows server:
-    if sys.platform=='windows':
+    if sys.platform=='win32':
         dll = ctypes.WinDLL("wlmData.dll")
         print("Loaded windows server library")
     
     # linux clients:
     elif sys.platform=='linux':
-        dll = ctypes.cdll.LoadLibrary("libwlmData.so")
-        print("Loaded linux client library")
-    
+        try:
+            #print("here")
+            dll = ctypes.cdll.LoadLibrary("libwlmData.so")
+            time.sleep(2)
+            print("Loaded linux client library")
+        except Exception as e:
+            print(e)
     else:
         print("Unknown OS")
         return None

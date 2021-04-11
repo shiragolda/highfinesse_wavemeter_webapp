@@ -488,3 +488,87 @@ flFileInfoCantWrite   = 0x0002
 flFileInfoCantRead    = 0x0004
 flFileInfoInvalidName = 0x0008
 cFileParameterError = -1
+
+
+####
+event_codes = {
+    code: name[3:] for name, code in globals().items()
+    if name.startswith("cmi")
+    }
+event_codes[0] = "NoEvent"
+
+wavelength_events = [code for event, code in globals().items()
+                     if event.startswith("cmi") and ("Wavelength" in event)]
+
+errors = {
+    code: name[7:] for name, code in globals().items()
+    if name.startswith("ResERR_")
+    }
+
+meas_errors = {
+    code: name[3:] for name, code in globals().items()
+    if name.startswith("Err")
+    }
+
+
+
+
+control_wlm_errors = {flServerStarted: "flServerStarted",
+                      flErrDeviceNotFound: "flErrDeviceNotFound",
+                      flErrDriverError: "flErrDriverError",
+                      flErrUSBError: "flErrUSBError",
+                      flErrUnknownDeviceError: "flErrUnknownDeviceError",
+                      flErrWrongSN: "flErrWrongSN",
+                      flErrUnknownSN: "flErrUnknownSN",
+                      flErrTemperatureError: "flErrTemperatureError",
+                      flErrPressureError: "flErrPressureError",
+                      flErrCancelledManually: "flErrCancelledManually",
+                      flErrWLMBusy: "flErrWLMBusy",
+                      flErrUnknownError: "flErrUnknownError",
+                      flNoInstalledVersionFound: "flNoInstalledVersionFound",
+                      flDesiredVersionNotFound: "flDesiredVersionNotFound",
+                      flErrFileNotFound: "flErrFileNotFound",
+                      flErrParmOutOfRange: "flErrParmOutOfRange",
+                      flErrCouldNotSet: "flErrCouldNotSet",
+                      flErrEEPROMFailed: "flErrEEPROMFailed",
+                      flErrFileFailed: "flErrFileFailed",
+                      flDeviceDataNewer: "flDeviceDataNewer",
+                      flFileDataNewer: "flFileDataNewer",
+                      flErrDeviceVersionOld: "flErrDeviceVersionOld",
+                      flErrFileVersionOld: "flErrFileVersionOld",
+                      flDeviceStampNewer: "flErrFileVersionOld",
+                      flFileStampNewer: "flFileStampNewer"}
+
+
+def control_wlm_to_str(return_code):
+    """ Converts the return code of a call to ControlWLMEx (with res = 1) to a
+    list of strings. """
+    codes = []
+    for flag, code in control_wlm_errors.items():
+        if (return_code & flag) != 0:
+            codes.append(code)
+    return codes
+
+
+def event_to_str(event_code):
+    """ Converts a WLM event code number to a string
+    These event codes are used by the wait for event and callback interfaces
+    """
+    if isinstance(event_code, c_long):
+        event_code = event_code.value
+
+    return event_codes.get(event_code, str(event_code))
+
+
+def error_to_str(error):
+    """ Converts a WLM error code to a string. """
+    return errors.get(error, "unknown: {}".format(error))
+
+
+def meas_error_to_str(error):
+    """ Converts a WLM error code to a string. """
+    return meas_errors.get(error, "unknown: {}".format(error))
+
+pid_datatypes = {
+    cmiPID_P:'double',cmiPID_I:'double',cmiPID_D:'double',cmiPID_T:'double',cmiPID_dt:'double',cmiDeviationSensitivityFactor:'double',cmiDeviationUnit:'long',cmiPIDUseTa:'long',cmiDeviationPolarity:'long',cmiDeviationSensitivityDim:'long',cmiPIDConstdt:'long',cmiDeviationChannel:'long',cmiPID_AutoClearHistory:'long'}
+    
